@@ -22,10 +22,10 @@ public class Rect {
 	}
 	public boolean overlaps(Rect r){
 		return 	(
-				(r.x < x + width)		&& 	// To the right of the rectangle.
-				(r.x + r.width < x) 	&& 	// To the left of the rectangle. 
-				(r.y + r.height > y)	&& 	// Above the rectangle.
-				(r.y < y + height)			// Below the rectangle.
+				(x 			< r.x + r.width)	&& 	// To the right of the rectangle.
+				(x + width 	> r.x) 				&& 	// To the left of the rectangle. 
+				(y 			< r.y + r.height)	&& 	// Above the rectangle.
+				(y + height > r.y)					// Below the rectangle.
 				);
 	}
 	public void grab(){
