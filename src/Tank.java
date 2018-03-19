@@ -1,10 +1,12 @@
 import java.awt.*;
 
-public class Tank {
+public class Tank  {
 	
 	double x;
 	double y;
 	int A;
+	
+	Rect container;
 	
 	static final int radius = 35;
 	static final int[] body_x 			=	{ 35, 35, -35, -35};
@@ -48,6 +50,9 @@ public class Tank {
 		this.drawPart(gun_x, 		gun_y, 			g);
 		this.drawPart(left_tire_x, 	left_tire_y, 	g);
 		this.drawPart(right_tire_x, right_tire_y, 	g);
+		
+		container = new Rect((int)x, (int)y, 35, 35);
+	
 
 	}
 	public void moveBy(int delta_x, int delta_y){
@@ -71,5 +76,8 @@ public class Tank {
 		double distance_squared = (mx - x )*(mx-x) + (my -y)*(my-y);
 		return (distance_squared < radius * radius);
 		
+	}
+	public boolean contained(Rect r1){
+		return r1.overlaps(container);
 	}
 }

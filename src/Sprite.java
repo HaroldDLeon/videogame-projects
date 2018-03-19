@@ -1,22 +1,58 @@
-import java.awt.Image;
 import java.awt.Graphics;
 
-public class Sprite {
-	Animation animation;
+public class Sprite extends Rect {
+	
 	int x;
 	int y;
+	int pose = 0;
 	
-	public Sprite(int x, int y, String filename, int count, int duration){
-		this.x = x;
-		this.y = y;
-		animation = new Animation(filename, count, duration);				
+	static final int up 	= 0;
+	static final int down  	= 1;
+	static final int left 	= 2;
+	static final int right 	= 3;
+	
+	boolean moving;
+	
+	Animation[] animation;
+	
+	public Sprite(int x, int y, String filename, String[] action,  int count, int duration){
+		super(x,y,20,5)
+
+		animation = new Animation[action.length];
+		for (int i = 0; i < action.length; i++) {
+			animation[i] = new Animation(filename+action[i]+"_", 5, 10);
+		}
 	}
-	
 	public void moveBy(int dx, int dy){
 		x += dx;
 		y += dy;
+		moving = true;
+	}
+	
+	public void moveUpBy(int dy){
+		y -= dy;
+		pose = up;
+		moving = true;
+	}
+	public void moveDownBy(int dy){
+		y += dy;
+		pose = down;
+		moving = true;
+	}
+
+	public void moveLeftBy(int dx){
+		x += dx;
+		pose = left;
+		moving = true;
+	}
+	public void moveRightBy(int dx){
+		x -= dx;
+		pose = right;
+		moving = true;
 	}
 	public void draw(Graphics g){
-		g.drawImage(animation.getImage(), x, y, null);
+		if (moving){ g.drawImage(animation[pose].nextImage(),  x, y, null); }
+		else 	   { g.drawImage(animation[pose].stillImage(), x, y, null); }
+		moving = false;
 	}
 }

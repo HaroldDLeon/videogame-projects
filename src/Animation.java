@@ -17,7 +17,7 @@ public class Animation {
 		this.duration = duration;
 		delay = duration;
 	}
-	public Image getImage(){
+	public Image nextImage(){
 		if (delay == 0 ){
 			current++;
 			if (current == image.length) { current = 0;}
@@ -27,7 +27,9 @@ public class Animation {
 			delay--;
 		}
 		return image[current];
-		
+	}
+	public Image stillImage(){
+		return image[0];
 	}
 	
 }
