@@ -1,6 +1,5 @@
 import java.applet.Applet;
 import java.awt.event.*;
-import java.util.Arrays;
 import java.awt.*;
 
 @SuppressWarnings("serial")
@@ -21,16 +20,16 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	Image image = Toolkit.getDefaultToolkit().getImage("C://Home//videogame-projects//src//gengar.gif");
 	Animation anim = new Animation("C://Home//videogame-projects//src//tea//", 19, 3);
 	
-	Rect r 	= new Rect(50,50, 200, 200);
-//	Rect r;
+	Rect r 	= new Rect(50,50, 0, 0);
 	Rect r1 = new Rect(400,400, 350, 100);
 
 	Tank[] tank_array = new Tank[4];
-	Tank[] active_tanks = new Tank[4];
+//	Tank[] active_tanks = new Tank[4];
+//	PolygonModel[] tank_array = {new PolygonModel(100, 100, 90)  };
 	
 	Image off_screen ;
 	Graphics off_g;
-	
+	UFO alien = new UFO(50,50, 90);
 	
 	
 		
@@ -42,28 +41,31 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 
 		t = new Thread(this);
 		t.start();
-	
+		
 		tank_array[0] = new Tank(100,  100,   90);
 		tank_array[1] = new Tank(200,  100,   90);
 		tank_array[2] = new Tank(300,  100,   90);
 		tank_array[3] = new Tank(400,  100,   90);
-//		active_tanks = tank_array[0];
+		
 		this.off_screen = createImage(1575, 741);
 		this.off_g 		=   off_screen.getGraphics();
 	}
 	
 	@SuppressWarnings("static-access")
 	public void run() {
+		try{
+			tank_array[0].selected = true;
+		} catch(Exception e){}
 		while(true){
-			for (int i = 0; i < active_tanks.length; i++) {
-				
-				if (active_tanks[i] != null){
-				if (lt_pressed)	{ active_tanks[i].rotateLeftBy(1);		}
-				if (rt_pressed)	{ active_tanks[i].rotateRightBy(1);		}
-				if (up_pressed)	{ active_tanks[i].moveForwardBy(1);		}
-				if (dn_pressed)	{ active_tanks[i].moveForwardBy(-1); 	}
+			for (int i = 0; i < tank_array.length; i++) {
+				if (tank_array[i].selected){
+				if (lt_pressed)	{ tank_array[i].rotateLeftBy(1);		}
+				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
+				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
+				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 	}
+				}
 			}
-			}
+			
 //			if (lt_pressed)	{ active_tank.moveBy(-1, 	0);		}
 //			if (rt_pressed)	{ active_tank.moveBy(1,		0);		}
 //			if (up_pressed)	{ active_tank.moveBy(0, 	1);		}
@@ -76,10 +78,12 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		}
 	}
 	public void update(Graphics g){
-		off_g.clearRect(0, 0, 21*75, 9*75);
-		paint(off_g);
-		g.drawImage(off_screen, 0, 0, null);
 		
+		off_g.clearRect(0, 0, 21*75, 9*75);
+		
+		paint(off_g);
+		
+		g.drawImage(off_screen, 0, 0, null);	
 		
 	}
 	public void paint(Graphics g){
@@ -87,13 +91,12 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		
 		r.draw(g);
 		r1.draw(g);
-		
-//		g.drawImage(anim.nextImage(), 21*75-496, 9*75-320, this);
-		
+		alien.draw(g);
 		for(int i = 0; i < tank_array.length; i++){
 			tank_array[i].draw(g);;
 		}
-		
+
+//		g.drawImage(anim.nextImage(), 21*75-496, 9*75-320, this);		
 //		if (overlap)		g.drawString("Rectangle overlaps", mx, my);
 //		else 				g.drawString("------------------", mx, my);
 
@@ -109,6 +112,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		if (code == e.VK_DOWN)	{ dn_pressed = true; }
 				
 	}
+	
 	@SuppressWarnings("static-access")
 	public void keyReleased(KeyEvent e) {
 		
@@ -120,6 +124,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		if (code == e.VK_DOWN)	{ dn_pressed = false; }
 
 	}
+	
 	public void keyTyped(KeyEvent e) {
 	}
 
@@ -129,13 +134,10 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -146,13 +148,9 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		
 		if(r.contains(mx,my)) 	r.grab();
 		
-//		for(int i = 0; i < tank_array.length; i++){
-//			if(tank_array[i].contains(mx, my)) active_tank = tank_array[i];
-//		}
 	}
 
 	public void mouseReleased(MouseEvent e) {
-//		r.drop();
 		r = new Rect(0,0,0,0);
 	}
 
@@ -165,13 +163,18 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		
 		r.resizeBy(dx, dy);
 		
-	
 		this.mx = temp_x;
 		this.my = temp_y;
 		overlap = r.overlaps(r1);
-		Arrays.fill(active_tanks, null);
+//		Arrays.fill(active_tanks, null);
 		for (int i = 0; i < tank_array.length; i++) {
-			if(tank_array[i].contained(r)){ active_tanks[i] = tank_array[i]; }
+			if(tank_array[i].contained(r)){ 
+//				active_tanks[i] = tank_array[i];
+				tank_array[i].selected = true;
+			}
+			else{
+				tank_array[i].selected = false;
+			}
 		}
 		
 		
@@ -201,6 +204,4 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 //		}
 		
 	}
-	
-
 }

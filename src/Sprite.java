@@ -2,8 +2,7 @@ import java.awt.Graphics;
 
 public class Sprite extends Rect {
 	
-	int x;
-	int y;
+
 	int pose = 0;
 	
 	static final int up 	= 0;
@@ -16,7 +15,7 @@ public class Sprite extends Rect {
 	Animation[] animation;
 	
 	public Sprite(int x, int y, String filename, String[] action,  int count, int duration){
-		super(x,y,20,5)
+		super(x,y,20,5);
 
 		animation = new Animation[action.length];
 		for (int i = 0; i < action.length; i++) {
