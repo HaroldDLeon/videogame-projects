@@ -10,28 +10,38 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	boolean up_pressed  = false;
 	boolean dn_pressed  = false;
 	
+	boolean sp_pressed = false;
+	
 	boolean overlap 	= false;
 	
 	int mx;
 	int my;
 	
 	Thread t;
+	Graphics off_g;
+	Image off_screen;
 	
 	Image image = Toolkit.getDefaultToolkit().getImage("C://Home//videogame-projects//src//gengar.gif");
 	Animation anim = new Animation("C://Home//videogame-projects//src//tea//", 19, 3);
 	
 	Rect r 	= new Rect(50,50, 0, 0);
 	Rect r1 = new Rect(400,400, 350, 100);
+	Rect ball = new Rect(10,10, 25, 25);
 
 	Tank[] tank_array = new Tank[4];
-//	Tank[] active_tanks = new Tank[4];
-//	PolygonModel[] tank_array = {new PolygonModel(100, 100, 90)  };
+	Tank[] active_tanks = new Tank[4];
 	
-	Image off_screen ;
-	Graphics off_g;
-	UFO alien = new UFO(50,50, 90);
+	Rect shell = new Rect(-1000, 0, 2, 2);
 	
+	UFO alien = new UFO(50,50, 0);
+//	UFO[] tank_array = {alien};
 	
+	String w_filename = "C://Home//videogame-projects//src//media//kid//Walk_";
+	String[] w_action = {"L", "R"};
+	Sprite kid = new Sprite(100, 20, w_filename, w_action, 16, 3 );
+	String j_filename = "C://Home//videogame-projects//src//media//kid//JMP_";
+	String[] j_action = {"L", "R"};
+	Sprite jumper = new Sprite(100, 20, j_filename, j_action, 4, 5);
 		
 	public void init(){
 		requestFocus();
@@ -48,7 +58,9 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		tank_array[3] = new Tank(400,  100,   90);
 		
 		this.off_screen = createImage(1575, 741);
-		this.off_g 		=   off_screen.getGraphics();
+		this.off_g 		= off_screen.getGraphics();
+		ball.setVelocity(10, 5);
+		kid.setStill(5);
 	}
 	
 	@SuppressWarnings("static-access")
@@ -59,17 +71,28 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		while(true){
 			for (int i = 0; i < tank_array.length; i++) {
 				if (tank_array[i].selected){
+//				if (lt_pressed)	{ tank_array[i].rotateLeftBy(1);		}
+//				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
+//				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
+//				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 		}
 				if (lt_pressed)	{ tank_array[i].rotateLeftBy(1);		}
 				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
 				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
-				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 	}
+				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 		}
+				if (sp_pressed) { tank_array[i].shoot(shell);			}
 				}
+				
 			}
+			shell.move();
 			
-//			if (lt_pressed)	{ active_tank.moveBy(-1, 	0);		}
-//			if (rt_pressed)	{ active_tank.moveBy(1,		0);		}
-//			if (up_pressed)	{ active_tank.moveBy(0, 	1);		}
-//			if (dn_pressed)	{ active_tank.moveBy(0,	   -1); 	}
+//			if (lt_pressed)	{ kid.moveLeftBy(1);		}
+//			if (rt_pressed)	{ kid.moveRightBy(1);		}
+//			if (up_pressed)	{ jumper.moveUpBy(1);		}
+//			if (dn_pressed)	{ jumper.moveDownBy(1); 	}
+			if (lt_pressed)	{ ball.moveBy(-1, 0);		}
+			if (rt_pressed)	{ ball.moveBy(1, 0);		}
+			if (up_pressed)	{ ball.moveBy(0, -1);		}
+			if (dn_pressed)	{ ball.moveBy(0, 1);		}
 			
 			repaint();
 			try {
@@ -88,15 +111,18 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	}
 	public void paint(Graphics g){
 		this.setSize(21*75, 9*75);
-		
 		r.draw(g);
-		r1.draw(g);
-		alien.draw(g);
+		shell.draw(g);
+//		kid.draw(g);
+//		jumper.draw(g);
+//		ball.draw(g);		
+//		r1.draw(g);
+//		alien.draw(g);
+
 		for(int i = 0; i < tank_array.length; i++){
 			tank_array[i].draw(g);;
 		}
-
-//		g.drawImage(anim.nextImage(), 21*75-496, 9*75-320, this);		
+		g.drawImage(anim.nextImage(), 21*75-496, 9*75-320, this);		
 //		if (overlap)		g.drawString("Rectangle overlaps", mx, my);
 //		else 				g.drawString("------------------", mx, my);
 
@@ -110,6 +136,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		if (code == e.VK_RIGHT)	{ rt_pressed = true; }
 		if (code == e.VK_UP)	{ up_pressed = true; }
 		if (code == e.VK_DOWN)	{ dn_pressed = true; }
+		if (code == e.VK_SPACE)	{ sp_pressed 	= true; }
 				
 	}
 	
@@ -122,7 +149,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		if (code == e.VK_RIGHT)	{ rt_pressed = false; }
 		if (code == e.VK_UP)	{ up_pressed = false; }
 		if (code == e.VK_DOWN)	{ dn_pressed = false; }
-
+		if (code == e.VK_SPACE)	{ sp_pressed 	 = false; }
 	}
 	
 	public void keyTyped(KeyEvent e) {

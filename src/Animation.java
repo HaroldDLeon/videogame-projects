@@ -11,8 +11,10 @@ public class Animation {
 	
 	public Animation(String filename, int count, int duration){
 		image = new Image[count];
-		for (int i = 0; i < count; i++) {
-			image[i] = Toolkit.getDefaultToolkit().getImage(filename+i+".gif");
+		
+		for (int i = 1; i < count; i++) {
+			image[i] = Toolkit.getDefaultToolkit().getImage(filename+i+".png");
+			
 		}
 		this.duration = duration;
 		delay = duration;
@@ -20,7 +22,7 @@ public class Animation {
 	public Image nextImage(){
 		if (delay == 0 ){
 			current++;
-			if (current == image.length) { current = 0;}
+			if (current == image.length) { current = 1;}	// If you have a  position for 0, change current = 0
 			delay = duration;
 		}
 		else{
@@ -29,7 +31,7 @@ public class Animation {
 		return image[current];
 	}
 	public Image stillImage(){
-		return image[0];
+		return image[1];
 	}
 	
 }

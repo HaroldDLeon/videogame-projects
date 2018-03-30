@@ -7,8 +7,8 @@ public class Sprite extends Rect {
 	
 	static final int up 	= 0;
 	static final int down  	= 1;
-	static final int left 	= 2;
-	static final int right 	= 3;
+	static final int left 	= 0;
+	static final int right 	= 1;
 	
 	boolean moving;
 	
@@ -16,10 +16,9 @@ public class Sprite extends Rect {
 	
 	public Sprite(int x, int y, String filename, String[] action,  int count, int duration){
 		super(x,y,20,5);
-
 		animation = new Animation[action.length];
 		for (int i = 0; i < action.length; i++) {
-			animation[i] = new Animation(filename+action[i]+"_", 5, 10);
+			animation[i] = new Animation(filename+action[i], count, duration);
 		}
 	}
 	public void moveBy(int dx, int dy){
@@ -40,12 +39,12 @@ public class Sprite extends Rect {
 	}
 
 	public void moveLeftBy(int dx){
-		x += dx;
+		x -= dx;
 		pose = left;
 		moving = true;
 	}
 	public void moveRightBy(int dx){
-		x -= dx;
+		x += dx;
 		pose = right;
 		moving = true;
 	}
@@ -53,5 +52,10 @@ public class Sprite extends Rect {
 		if (moving){ g.drawImage(animation[pose].nextImage(),  x, y, null); }
 		else 	   { g.drawImage(animation[pose].stillImage(), x, y, null); }
 		moving = false;
+	}
+	public void setStill(int newStill){
+		for(int i = 0; i < this.animation.length; i++){
+			animation[i].current = newStill;
+		}
 	}
 }
