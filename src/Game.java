@@ -96,7 +96,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 			
 			repaint();
 			try {
-				t.sleep(15);
+				t.sleep(1000/144);
 			} catch(Exception e){}
 		}
 	}
