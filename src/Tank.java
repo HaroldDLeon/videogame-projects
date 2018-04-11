@@ -1,6 +1,6 @@
 public class Tank extends PolygonModel {
 
-	public Tank(int x, int y, int angle){
+	public Tank(double x, double y, int angle){
 		super(x,y,angle);
 	}
 	public int[][] structure_x (){

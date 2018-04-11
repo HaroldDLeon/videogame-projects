@@ -2,22 +2,30 @@ import java.awt.*;
 
 public class Rect {
 
-	int x;
-	int y;
-	int width;
-	int height;
-	int dx = 0;
-	int dy = 0;
-	boolean held = false;
+	double x;
+	double y;
+	double width;
+	double height;
+	double vx = 0;
+	double vy = 0;
 	
-	public Rect(int x, int y, int width, int height){
+	static final double g = 0.01;
+	
+	double ax = 0;
+	double ay = g;
+	
+	
+	boolean held = false;
+
+	
+	public Rect(double x, double y, double width, double height){
 		this.x = 		x;
 		this.y = 		y;
 		this.width 	= 	width;
 		this.height = 	height;
 	}
 	public void draw(Graphics g){
-		g.drawRect(x, y, width, height);
+		g.drawRect((int) x, (int) y, (int) width,(int) height);
 	}
 	public boolean contains(int mx, int my){
 		return (x <= mx) && (mx <= x+width) && (y <= my) && (my <= y+height);
@@ -37,8 +45,11 @@ public class Rect {
 		held = false;
 	}
 	public void move(){
-		x += dx;
-		y += dy;
+		vx += ax;
+		vy += ay;
+		
+		x += vx;
+		y += vy;
 	}
 	public void setLocation(int x, int y){
 		this.x = x;
@@ -50,12 +61,16 @@ public class Rect {
 	}
 	
 	public void resizeBy(int delta_w, int delta_h){
-		width += delta_w;
+		width  += delta_w;
 		height += delta_h;
 	}
 	public void setVelocity(int velocity_x, int velocity_y){
-		dx = velocity_x;
-		dy = velocity_y;
+		this.vx = velocity_x;
+		this.vy = velocity_y;
+	}
+	public void setAcceleration(int acceleration_x, int acceleration_y){
+		this.ax = acceleration_x;
+		this.ay = acceleration_y;
 	}
 	
 

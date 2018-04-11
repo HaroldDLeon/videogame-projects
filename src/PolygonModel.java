@@ -17,7 +17,7 @@ public abstract class PolygonModel {
 	public abstract int[][] structure_y();
 	
 			
-	public PolygonModel(int x, int y, int angle){
+	public PolygonModel(double x, double y, int angle){
 		this.x = x;
 		this.y = y;
 		this.A = angle;

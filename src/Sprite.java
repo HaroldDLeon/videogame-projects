@@ -49,8 +49,8 @@ public class Sprite extends Rect {
 		moving = true;
 	}
 	public void draw(Graphics g){
-		if (moving){ g.drawImage(animation[pose].nextImage(),  x, y, null); }
-		else 	   { g.drawImage(animation[pose].stillImage(), x, y, null); }
+		if (moving){ g.drawImage(animation[pose].nextImage(),  (int) x, (int) y, null); }
+		else 	   { g.drawImage(animation[pose].stillImage(), (int) x, (int) y, null); }
 		moving = false;
 	}
 	public void setStill(int newStill){

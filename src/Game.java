@@ -59,7 +59,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 		
 		this.off_screen = createImage(1575, 741);
 		this.off_g 		= off_screen.getGraphics();
-		ball.setVelocity(10, 5);
+		ball.setVelocity(3, 5);
 		kid.setStill(5);
 	}
 	
@@ -75,10 +75,10 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 //				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
 //				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
 //				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 		}
-				if (lt_pressed)	{ tank_array[i].rotateLeftBy(1);		}
-				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
-				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
-				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 		}
+				if (lt_pressed)	{ tank_array[i].rotateLeftBy(3);		}
+				if (rt_pressed)	{ tank_array[i].rotateRightBy(3);		}
+				if (up_pressed)	{ tank_array[i].moveForwardBy(3);		}
+				if (dn_pressed)	{ tank_array[i].moveForwardBy(-3); 		}
 				if (sp_pressed) { tank_array[i].shoot(shell);			}
 				}
 				
@@ -96,7 +96,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 			
 			repaint();
 			try {
-				t.sleep(1000/144);
+				t.sleep(1000/60);
 			} catch(Exception e){}
 		}
 	}
