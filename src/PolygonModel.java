@@ -2,7 +2,7 @@
 
 public abstract class PolygonModel {
 	
-	int A;
+	int angle;
 	double x;
 	double y;
 	Rect container;
@@ -20,13 +20,13 @@ public abstract class PolygonModel {
 	public PolygonModel(double x, double y, int angle){
 		this.x = x;
 		this.y = y;
-		this.A = angle;
+		this.angle = angle;
 	}
 
 	public void drawPart(int[] array_x, int[] array_y, Graphics g){
 
-		double sinA = Lookup.sin[A];
-		double cosA = Lookup.cos[A];
+		double sinA = Lookup.sin[angle];
+		double cosA = Lookup.cos[angle];
 
 		int[] xp = new int[4];
 		int[] yp = new int[4];
@@ -50,16 +50,16 @@ public abstract class PolygonModel {
 		y += delta_y;
 	}
 	public void moveForwardBy(int d){
-		x += d * Math.cos(A * Math.PI/180);
-		y += d * Math.sin(A * Math.PI/180);
+		x += d * Math.cos(angle * Math.PI/180);
+		y += d * Math.sin(angle * Math.PI/180);
 	}
 	public void rotateLeftBy(int delta_a){
-		A -= delta_a;
-		if (A < 0)		{ A += 360;}
+		angle -= delta_a;
+		if (angle < 0)		{ angle += 360;}
 	}
 	public void rotateRightBy(int delta_a){
-		A += delta_a;
-		if (A >= 360)	{ A -= 360;}
+		angle += delta_a;
+		if (angle >= 360)	{ angle -= 360;}
 	}
 	public boolean contains(int mx, int my){
 		double distance_squared = (mx - x )*(mx-x) + (my -y)*(my-y);

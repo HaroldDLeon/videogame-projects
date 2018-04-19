@@ -9,7 +9,7 @@ public class Rect {
 	double vx = 0;
 	double vy = 0;
 	
-	static final double g = 0.01;
+	static final double g = 0.000;
 	
 	double ax = 0;
 	double ay = g;

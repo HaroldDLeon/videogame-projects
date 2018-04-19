@@ -31,7 +31,9 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	Tank[] tank_array = new Tank[4];
 	Tank[] active_tanks = new Tank[4];
 	
-	Rect shell = new Rect(-1000, 0, 2, 2);
+	BadTank bad_tank = new BadTank(900, 500, 40);
+	
+//	Rect shell = new Rect(-1000, 0, 2, 2);
 	
 	UFO alien = new UFO(50,50, 0);
 //	UFO[] tank_array = {alien};
@@ -42,6 +44,10 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	String j_filename = "C://Home//videogame-projects//src//media//kid//JMP_";
 	String[] j_action = {"L", "R"};
 	Sprite jumper = new Sprite(100, 20, j_filename, j_action, 4, 5);
+	
+	Rect [] shells = new Rect[10000];
+	int current_shell = 0;
+	int delay = 0;
 		
 	public void init(){
 		requestFocus();
@@ -51,11 +57,18 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 
 		t = new Thread(this);
 		t.start();
+		for (int i = 0; i < tank_array.length; i++) {
+			tank_array[i] = new Tank(i*100 + 100, 100, 90);
+		}
+		for (int i = 0; i < shells.length; i++) {
+			shells[i]= new Rect(-1000, 0, 2, 2);
+		} 
 		
-		tank_array[0] = new Tank(100,  100,   90);
-		tank_array[1] = new Tank(200,  100,   90);
-		tank_array[2] = new Tank(300,  100,   90);
-		tank_array[3] = new Tank(400,  100,   90);
+//		tank_array[0] = new Tank(100,  100,   90);
+//		tank_array[1] = new Tank(200,  100,   90);
+//		tank_array[2] = new Tank(300,  100,   90);
+//		tank_array[3] = new Tank(400,  100,   90);
+
 		
 		this.off_screen = createImage(1575, 741);
 		this.off_g 		= off_screen.getGraphics();
@@ -69,21 +82,38 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 			tank_array[0].selected = true;
 		} catch(Exception e){}
 		while(true){
+			
+			bad_tank.moveTowards(tank_array[0]);
+			
 			for (int i = 0; i < tank_array.length; i++) {
 				if (tank_array[i].selected){
-//				if (lt_pressed)	{ tank_array[i].rotateLeftBy(1);		}
-//				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
-//				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
-//				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 		}
-				if (lt_pressed)	{ tank_array[i].rotateLeftBy(3);		}
-				if (rt_pressed)	{ tank_array[i].rotateRightBy(3);		}
-				if (up_pressed)	{ tank_array[i].moveForwardBy(3);		}
-				if (dn_pressed)	{ tank_array[i].moveForwardBy(-3); 		}
-				if (sp_pressed) { tank_array[i].shoot(shell);			}
+					//				if (lt_pressed)	{ tank_array[i].rotateLeftBy(1);		}
+					//				if (rt_pressed)	{ tank_array[i].rotateRightBy(1);		}
+					//				if (up_pressed)	{ tank_array[i].moveForwardBy(1);		}
+					//				if (dn_pressed)	{ tank_array[i].moveForwardBy(-1); 		}
+					if (lt_pressed)	{ tank_array[i].rotateLeftBy(3);		}
+					if (rt_pressed)	{ tank_array[i].rotateRightBy(3);		}
+					if (up_pressed)	{ tank_array[i].moveForwardBy(3);		}
+					if (dn_pressed)	{ tank_array[i].moveForwardBy(-3); 		}
+					if (sp_pressed) {
+						if(delay > 5){
+							tank_array[i].shoot(shells[current_shell]);
+							current_shell += 1;
+							if (current_shell == shells.length) current_shell = 0;
+							delay = 0;
+						}
+						delay += 1;
+					}
+					if (bad_tank.shoot(shells[current_shell], tank_array[0])){
+						current_shell += 1;
+						delay += 1; 
+					}
 				}
-				
 			}
-			shell.move();
+			shells[current_shell].move();
+			for (int i = 0; i < shells.length; i++) {
+				shells[i].move();
+			}
 			
 //			if (lt_pressed)	{ kid.moveLeftBy(1);		}
 //			if (rt_pressed)	{ kid.moveRightBy(1);		}
@@ -112,7 +142,11 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	public void paint(Graphics g){
 		this.setSize(21*75, 9*75);
 		r.draw(g);
-		shell.draw(g);
+//		shell.draw(g);
+		for (int i = 0; i < shells.length; i++) {
+			shells[i].draw(g);
+		}
+		bad_tank.draw(g);
 //		kid.draw(g);
 //		jumper.draw(g);
 //		ball.draw(g);		

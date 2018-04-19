@@ -26,8 +26,8 @@ public class Tank extends PolygonModel {
 	public void shoot(Rect shell){
 		int d = 5;
 		shell.setLocation((int) x, (int) y);
-		int velocity_x = (int) (d * Math.cos(A * Math.PI/180));
-		int velocity_y = (int) (d * Math.sin(A * Math.PI/180));
+		int velocity_x = (int) (d * Math.cos(angle * Math.PI/180));
+		int velocity_y = (int) (d * Math.sin(angle * Math.PI/180));
 		shell.setVelocity(velocity_x, velocity_y);
 	}
 }

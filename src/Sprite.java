@@ -46,7 +46,7 @@ public class Sprite extends Rect {
 	public void moveRightBy(int dx){
 		x += dx;
 		pose = right;
-		moving = true;
+		moving = true ;
 	}
 	public void draw(Graphics g){
 		if (moving){ g.drawImage(animation[pose].nextImage(),  (int) x, (int) y, null); }
