@@ -9,7 +9,7 @@ public class Rect {
 	double vx = 0;
 	double vy = 0;
 	
-	static final double g = 0.000;
+	static final double g = 0.00;
 	
 	double ax = 0;
 	double ay = g;
@@ -68,7 +68,7 @@ public class Rect {
 		this.vx = velocity_x;
 		this.vy = velocity_y;
 	}
-	public void setAcceleration(int acceleration_x, int acceleration_y){
+	public void setAcceleration(double acceleration_x, double acceleration_y){
 		this.ax = acceleration_x;
 		this.ay = acceleration_y;
 	}
