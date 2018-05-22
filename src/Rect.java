@@ -1,4 +1,4 @@
-import java.awt.*;
+import java.awt.Graphics;
 
 public class Rect {
 
@@ -9,7 +9,7 @@ public class Rect {
 	double vx = 0;
 	double vy = 0;
 	
-	static final double g = 0.00;
+	static final double g = 0.2;
 	
 	double ax = 0;
 	double ay = g;
@@ -26,6 +26,9 @@ public class Rect {
 	}
 	public void draw(Graphics g){
 		g.drawRect((int) x, (int) y, (int) width,(int) height);
+	}
+	public void drawFull(Graphics g){
+		g.fillRect((int) x, (int) y, (int) width, (int)height);
 	}
 	public boolean contains(int mx, int my){
 		return (x <= mx) && (mx <= x+width) && (y <= my) && (my <= y+height);
@@ -64,6 +67,10 @@ public class Rect {
 		width  += delta_w;
 		height += delta_h;
 	}
+	public void resizeTo(double dw, double dh){
+		height 	= dh;
+		width 	= dw;
+	}
 	public void setVelocity(int velocity_x, int velocity_y){
 		this.vx = velocity_x;
 		this.vy = velocity_y;
@@ -72,6 +79,11 @@ public class Rect {
 		this.ax = acceleration_x;
 		this.ay = acceleration_y;
 	}
-	
+	public void modifyRect(double x, double y, double width, double height){
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
 
 }

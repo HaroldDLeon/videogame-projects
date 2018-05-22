@@ -1,49 +1,91 @@
 import java.applet.Applet;
-import java.awt.event.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.util.Random;
+
+// Assets used from https://www.graphictoon.com/product-page/limbo-style-art
 
 @SuppressWarnings("serial")
 public class Game extends Applet implements KeyListener, Runnable, MouseListener, MouseMotionListener {
-
-	private static final int shell_delay = 15;
+	
+	/* Game timers */
+	private static final int cx 			= 10;
+	private static final int kshot_delay 	= 10;
+	private static final int bshot_delay 	= 50;
+	private static int 		 dying_delay 	= 300;
+	private static int 		 boss_delay 	= 300;
+	
 	boolean lt_pressed  = false;
 	boolean rt_pressed  = false;
 	boolean up_pressed  = false;
 	boolean dn_pressed  = false;
+	boolean jp_pressed 	= false;
+	boolean sp_pressed 	= false;
+	boolean overlap 	= false;
 
-	boolean sp_pressed = false;
-
-	boolean overlap = false;
+	/* Thread variables */
+	Thread t;
+	Graphics off_g;
+	Image off_screen;
 
 	int mx;
 	int my;
 
-	Thread t;
-	Graphics off_g;
-	Image off_screen;
-	
-	Rect r 	= new Rect(50,50, 0, 0);
-	Rect r1 = new Rect(400,400, 350, 100);
-	Rect ball = new Rect(10,10, 25, 25);
+	/* Window's Variables */
+	int window_width = 1600;
+	int window_height = 900;	
+	boolean beginning_screen = false;
+	boolean ending_screen	 = false;
 
-	Tank[] tank_array = new Tank[4];
-	Tank[] active_tanks = new Tank[4];
+	/*  Game Variables  */
+	int timer;
+	int cb 			= 0;
+	int c_shell 	= 0;
+	int boss_timer 	= 0;
+	int shell_timer = 0;
 
-	BadTank bad_tank = new BadTank(900, 500, 40);
-	
-	Line line1 = new Line(900, 650, 450, 400);
-	Circle circle1 = new Circle(200, 200, 10, 45);
+	boolean game_paused = false;
+	boolean boss_drawn 	= false;
 
-	int tank_timer = 0;
-	int bad_tank_timer = 0;
-	
-	Rect [] shells = new Rect[10000];
-	int current_shell = 0;
-	
-	Cube IceCube = new Cube(400, 100, 500, 0);
-	
+	Kid boy 	= new Kid(130, 483);
+	Font timer_font = new Font("Roboto Light", Font.PLAIN, 36);
+	Font score_font = new Font("Roboto Light", Font.PLAIN, 72);
+
+	Boss[] boss 	= new Boss[7];
+	Enemy[] lacay 	= new Enemy[50];
+	Ball[] friendly_bullet 		= new Ball[10];
+	Ball[] enemy_bullet 		= new Ball[10];
+
+	Image game_fg 	= Toolkit.getDefaultToolkit().getImage("../assets/map/game_overlay.png");
+
+	/* Game Intro */
+	Rect start_btn	= new Rect(window_width/2 -200 ,window_height/2 -50, 400, 100);
+	Image start_img = Toolkit.getDefaultToolkit().getImage("../assets/Title/start_btn.png");
+	Image intro_fg 	= Toolkit.getDefaultToolkit().getImage("../assets/Title/intro_fg.png");
+	Image intro_bg 	= Toolkit.getDefaultToolkit().getImage("../assets/Title/intro_bg.png");
+
+	/* In-Game */
+	Map game_map = new Map();
+	Image pause_img = Toolkit.getDefaultToolkit().getImage("../assets/map/pause.png");
+	Image play_img 	= Toolkit.getDefaultToolkit().getImage("../assets/map/play.png");
+	Rect pause_btn	= new Rect(700, 12, 50, 50);
+	ImageLayer base_layer	= new ImageLayer("../assets/map/layer_3.png", 	1);
+
+	/* Testing variables and objects */
+	Image testing_img = Toolkit.getDefaultToolkit().getImage("../assets/Boss/bullet.png");
+	Boss boss1 	= new Boss(1290, 498, 1);
+	Rect base	= new Rect(0, 672, window_width, window_height);
 
 	public void init(){
+		initializeArrays();
 		requestFocus();
 		addKeyListener(this);
 		addMouseListener(this);
@@ -51,204 +93,239 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 
 		t = new Thread(this);
 		t.start();
-		for (int i = 0; i < tank_array.length; i++) {
-			tank_array[i] = new Tank(i*100 + 100, 100, 90);
-		}
-		for (int i = 0; i < shells.length; i++) {
-			shells[i]= new Rect(-1000, 0, 2, 2);
-		} 
 
-		this.off_screen = createImage(1575, 741);
-		this.off_g 		= off_screen.getGraphics();
-		ball.setVelocity(3, 5);
+		this.off_screen = createImage(window_width, window_height);
+		this.off_g 		=   off_screen.getGraphics();
 	}
 
 	@SuppressWarnings("static-access")
 	public void run() {
-		try{
-			tank_array[0].selected = true;
-		} catch(Exception e){}
 		while(true){
-
-			bad_tank.moveTowards(tank_array[0]);
-
-			for (int i = 0; i < tank_array.length; i++) {
-				if (tank_array[i].selected){
-					if (lt_pressed)	{ tank_array[i].rotateLeftBy(3);		}
-					if (rt_pressed)	{ tank_array[i].rotateRightBy(3);		}
-					if (up_pressed)	{ tank_array[i].moveForwardBy(3);		}
-					if (dn_pressed)	{ tank_array[i].moveForwardBy(-3); 		}
-					if (sp_pressed) {
-						if(tank_timer > shell_delay){
-							tank_array[i].shoot(shells[current_shell]);
-							current_shell++;
-							if (current_shell == shells.length) current_shell = 0;
-							tank_timer = 0;
-						}
-						tank_timer++;
-					}	
-					// Make the bad tank shoot.
-					if (bad_tank.shoot(shells[current_shell], tank_array[0], bad_tank_timer)){
-						current_shell++;
+			if(!beginning_screen && !game_paused && !ending_screen){
+				if(!boy.isDead()){
+					if 	(lt_pressed){	this.moveMap(cx); 	}
+					if 	(rt_pressed){	this.moveMap(-cx); 	}
+					if 	(up_pressed && !boy.jumping){ 	
+						boy.jump();
 					}
-					bad_tank_timer++;
-					if (bad_tank_timer > shell_delay ){
-						bad_tank_timer = 0;
+//					if	(dn_pressed){	boy.reduceHealth(10);		}
+					if	(sp_pressed){
+						if(shell_timer > kshot_delay){
+							boy.shoot(friendly_bullet[c_shell]);
+							c_shell++;
+							if (c_shell== friendly_bullet.length) c_shell = 0;
+							shell_timer = 0;
+						}
+						shell_timer++;
+					}	
+					
+					/* Make the boss shoot. */ 
+					if (boss[cb].shoot(enemy_bullet[c_shell],  boss_timer)){
+						c_shell++;
+						if (c_shell== enemy_bullet.length) c_shell = 0;
+					}
+					boss_timer++;
+					if (boss_timer > bshot_delay ){
+						boss_timer = 0;
+					}
+					if (boy.jumping){ 	boy.move();	}
+					timer += 1;
+					if ((boy.overlaps(boss[cb]) && boss_drawn)){
+						boy.reduceHealth(10);
+					}
+					
+					// Spawn a new boss every 
+					if (!boss_drawn && boss_delay <= 0){
+						boss_drawn = true;
+						boss_delay = 2000;
+					}
+					else{
+						boss_delay--;
 					}
 				}
-			}
-			shells[current_shell].move();
-			for (int i = 0; i < shells.length; i++) {
-				shells[i].move();
-			}
-			
-			if (lt_pressed)	{ IceCube.moveBy(-10, 0, 0);		}
-			if (rt_pressed)	{ IceCube.moveBy(10, 0, 0);		}
-			if (up_pressed)	{ IceCube.moveBy(0, -10, 0);		}
-			if (dn_pressed)	{ IceCube.moveBy(0, 10, 0);	}
-			
-			double distance = line1.distanceTo(circle1.x, circle1.y);
-			if(circle1.radius > distance)
-	            circle1.moveBy((int)((circle1.radius-distance)*line1.x_normal), (int)((circle1.radius-distance)*line1.y_normal));
 
-			repaint();
+				for (int i = 0; i < lacay.length; i++) {
+					if(boy.overlaps(lacay[i])){
+						boy.reduceHealth(10);
+						lacay[i].setLocation(1800, 643);
+					}
+				}
+				for (int i = 0; i < enemy_bullet.length; i++) {
+					if(boy.shot_by(enemy_bullet[i]) && !enemy_bullet[i].registered && boss_drawn) {
+						boy.reduceHealth(10);
+						enemy_bullet[i].registered = true;
+					}
+					if(boss[cb].shot_by(friendly_bullet[i]) && !friendly_bullet[i].registered && boss_drawn) {
+						boss[cb].reduceHealth(10);
+						friendly_bullet[i].registered = true;
+						if(boss[cb].health <= 0) {
+							boss[cb].reinitialize();
+//							boss_drawn = false;
+							boss[cb].is_dead = true;
+							cb++;
+							if(cb == boss.length) { cb = 0;}
+						}
+					}
+					for (int j = 0; j < lacay.length; j++) {
+						if(lacay[j].shot_by(friendly_bullet[i])){
+							lacay[j].setLocation(1800, 643);
+						}
+					}
+				}
+				if(boy.is_dead){
+					dying_delay--;
+					if( dying_delay == 0)ending_screen = true;	
+				}
+				moveBullets();
+				moveEnemy();
+
+			}
+			repaint(); 	
 			try {
-				t.sleep(1000/60);
+				t.sleep(15);
 			} catch(Exception e){}
 		}
 	}
+
+	private void initializeArrays() {
+		int rand_type;
+		for(int i = 0; i < boss.length; i++){
+			rand_type  = new Random().nextInt(2);
+			boss[i] = new Boss(1290, 498, rand_type);
+		}
+		for(int i = 0; i < lacay.length; i++){
+			lacay[i] = new Enemy(1900+200*i, 643);
+		}
+		for (int i = 0; i < friendly_bullet.length; i++) {
+			enemy_bullet[i]		= new Ball(-1000, 0, false);
+			friendly_bullet[i]	= new Ball(-1000, 0, true);
+			
+		}	
+	}
+	
 	public void update(Graphics g){
-
-		off_g.clearRect(0, 0, 21*75, 9*75);
-
+		off_g.clearRect(0, 0, window_width, window_height);
 		paint(off_g);
-
-		g.drawImage(off_screen, 0, 0, null);	
+		g.drawImage(off_screen, 0, 0, null);
 
 	}
+	
 	public void paint(Graphics g){
-		this.setSize(21*75, 9*75);
-		IceCube.draw(g);
-//		line1.draw(g);	
-//		r.draw(g);
-//		circle1.draw(g);
-//		r1.draw(g);
-//		bad_tank.draw(g);
-		for(int i = 0; i < tank_array.length; i++){
-			tank_array[i].draw(g);
-		}
-		for (int i = 0; i < shells.length; i++) {
-			shells[i].draw(g);
-		}
-//		g.drawImage(anim.nextImage(), 21*75-496, 9*75-320, this);
-		
-//		g.drawString(Double.toString(distance), mx, my);
-//		if (overlap)		g.drawString(Double.toString(distance), mx, my);
-//		else 				g.drawString("------------------", mx, my);
+		this.setSize(window_width, window_height);
+		g.setColor(Color.white);
+		g.setFont(timer_font);
 
+		if (beginning_screen){
+			this.drawIntro(g);
+		}
+		else if(ending_screen){
+			this.drawEnding(g);
+		}
+		else {
+			this.drawMap(g);
+		}
 	}
-	/* The Key Press events are handled on a way where the OS calls this functions when key presses are detected. */
+	
+	public void moveBullets(){
+		for (int i = 0; i < friendly_bullet.length; i++) {
+			friendly_bullet[i].move();
+			if(boss_drawn){enemy_bullet[i].move();}
+		}
+	}
+	public void moveMap(int dx){
+		if (dx < 0){ 
+			game_map.moveRightBy(dx);
+			base_layer.moveRightBy(dx);
+			boy.moveRightBy(6);
+		}
+		else{
+			game_map.moveRightBy(dx);
+			base_layer.moveRightBy(dx);
+			boy.moveLeftBy(6);
+		}
+	}
+	public void drawIntro(Graphics g){
+		g.drawImage(intro_bg, 0, 0, null);
+		g.drawImage(intro_fg, 0, 0, null);
+		g.drawImage(start_img, (int)start_btn.x, (int)start_btn.y, (int)start_btn.width, (int)start_btn.height, null);
+	}
+	public void drawMap(Graphics g){
+		game_map.draw(g);
+		boy.draw(g);
+		if(boss_drawn)	{ boss[cb].draw(g);}
+		base_layer.draw(g);
+		
+		String time_passed = "Time: " + Integer.toString((int)(timer/60));
+		g.drawString(time_passed, 750, 50);
+		
+		if(!game_paused){ g.drawImage(pause_img, 700, 12, 50, 50, null);	}
+		else			{ g.drawImage(play_img,  700, 12, 50, 50, null);	}
+		
+		for (int i = 0; i < friendly_bullet.length; i++) {
+			if(boss_drawn) {enemy_bullet[i].draw(g);}
+			friendly_bullet[i].draw(g);
+		}
+		for (int i = 0; i < lacay.length; i++) {
+			lacay[i].draw(g);	
+		}
+		
+		g.drawImage(game_fg, 0,  0,1600, 900,  null);
+	}
+	public void drawEnding(Graphics g){
+		g.drawImage(intro_bg, 0, 0, null);
+		g.drawImage(intro_fg, 0, 0,  null);
+		String final_score = "Game Over: " + Integer.toString((int)(timer/60));
+		g.setFont(score_font);
+		g.setColor(Color.BLACK);
+		g.drawString(final_score, 590, 450);
+
+		g.drawImage(game_fg, 0,  0,1600, 900,  null);
+	}
+	public void moveEnemy(){
+		if( boss_drawn ){	boss[cb].interact(); }
+		
+		for (int i = 0; i < boss.length; i++) {
+			lacay[i].interact((int)boy.x);
+		}
+	}
 	@SuppressWarnings("static-access")
 	public void keyPressed(KeyEvent e) {
-
 		int code = e.getKeyCode();
 		if (code == e.VK_LEFT) 	{ lt_pressed = true; }
 		if (code == e.VK_RIGHT)	{ rt_pressed = true; }
 		if (code == e.VK_UP)	{ up_pressed = true; }
 		if (code == e.VK_DOWN)	{ dn_pressed = true; }
-		if (code == e.VK_SPACE)	{ sp_pressed 	= true; }
-
+		if (code == e.VK_SPACE)	{ sp_pressed = true; }
 	}
-
 	@SuppressWarnings("static-access")
 	public void keyReleased(KeyEvent e) {
-
 		int code = e.getKeyCode();
-
 		if (code == e.VK_LEFT) 	{ lt_pressed = false; }
 		if (code == e.VK_RIGHT)	{ rt_pressed = false; }
 		if (code == e.VK_UP)	{ up_pressed = false; }
 		if (code == e.VK_DOWN)	{ dn_pressed = false; }
-		if (code == e.VK_SPACE)	{ sp_pressed 	 = false; }
-	}
-
-	public void keyTyped(KeyEvent e) {
-	}
-
-	public void mouseClicked(MouseEvent e) {
-
+		if (code == e.VK_SPACE)	{ sp_pressed = false; }
 
 	}
+	public void keyTyped(KeyEvent e) {}
+	public void mouseClicked(MouseEvent e) {	
+		int mx = e.getX();
+		int my = e.getY();
 
-	public void mouseEntered(MouseEvent e) {
-
+		if(start_btn.contains(mx, my)){ beginning_screen = false;}
+		else if(pause_btn.contains(mx, my)){ game_paused = !game_paused;}
 	}
-
-	public void mouseExited(MouseEvent e) {
-	}
-
+	
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {
 		mx = e.getX();
 		my = e.getY();
 
-		r = new Rect(mx, my, 0, 0);
-
-		if(r.contains(mx,my)) 	r.grab();
-
+//		System.out.println("mx: " + Integer.toString(mx) +" my: " + Integer.toString(my)); 
 	}
+	public void mouseReleased(MouseEvent e) {}
+	public void mouseDragged(MouseEvent e ) {}
+	public void mouseMoved(MouseEvent e) {}
 
-	public void mouseReleased(MouseEvent e) {
-		r = new Rect(0,0,0,0);
-	}
-
-	public void mouseDragged(MouseEvent e ) {
-		int temp_x = e.getX();
-		int temp_y = e.getY();
-
-		int dx = temp_x - this.mx;
-		int dy = temp_y - this.my;
-
-		r.resizeBy(dx, dy);
-
-		this.mx = temp_x;
-		this.my = temp_y;
-		overlap = r.overlaps(r1);
-		//		Arrays.fill(active_tanks, null);
-		for (int i = 0; i < tank_array.length; i++) {
-			if(tank_array[i].contained(r)){ 
-				//				active_tanks[i] = tank_array[i];
-				tank_array[i].selected = true;
-			}
-			else{
-				tank_array[i].selected = false;
-			}
-		}
-
-
-		/*
-		int temp_x = e.getX();
-		int temp_y = e.getY();
-
-		int dx = temp_x - this.mx;
-		int dy = temp_y - this.my;
-
-		if (r.held) r.moveBy(dx, dy);
-		this.mx = temp_x;
-		this.my = temp_y;
-
-		overlap = r.overlaps(r1); 
-		 */
-
-	}
-
-	public void mouseMoved(MouseEvent e) {
-		//		mx = e.getX();
-		//		my = e.getY();
-		//		mouse_inside = false;
-		//		for(int i = 0; i < tank_array.length; i++){
-		//			mouse_inside = tank_array[i].contains(mx, my);
-		//			if(mouse_inside) break;
-		//		}
-
-	}
 }
