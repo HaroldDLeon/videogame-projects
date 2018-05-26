@@ -17,11 +17,11 @@ import java.util.Random;
 public class Game extends Applet implements KeyListener, Runnable, MouseListener, MouseMotionListener {
 	
 	/* Game timers */
-	private static final int cx 			= 10;
-	private static final int kshot_delay 	= 10;
-	private static final int bshot_delay 	= 50;
-	private static int 		 dying_delay 	= 300;
-	private static int 		 boss_delay 	= 300;
+	private static final int cx 			=   10;
+	private static final int kshot_delay 	=   10;
+	private static final int bshot_delay 	=   50;
+	private static int 		 dying_delay 	=  300;
+	private static int 		 boss_delay 	= 3500;
 	
 	boolean lt_pressed  = false;
 	boolean rt_pressed  = false;
@@ -42,7 +42,7 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 	/* Window's Variables */
 	int window_width = 1600;
 	int window_height = 900;	
-	boolean beginning_screen = false;
+	boolean beginning_screen = true;
 	boolean ending_screen	 = false;
 
 	/*  Game Variables  */
@@ -168,7 +168,9 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 					}
 					for (int j = 0; j < lacay.length; j++) {
 						if(lacay[j].shot_by(friendly_bullet[i])){
-							lacay[j].setLocation(1800, 643);
+							int rand_int;
+							rand_int  = new Random().nextInt(50);
+							lacay[j].setLocation(600*rand_int, 643);
 						}
 					}
 				}
@@ -194,7 +196,8 @@ public class Game extends Applet implements KeyListener, Runnable, MouseListener
 			boss[i] = new Boss(1290, 498, rand_type);
 		}
 		for(int i = 0; i < lacay.length; i++){
-			lacay[i] = new Enemy(1900+200*i, 643);
+			rand_type  = new Random().nextInt(50);
+			lacay[i] = new Enemy(1900+200*rand_type, 643);
 		}
 		for (int i = 0; i < friendly_bullet.length; i++) {
 			enemy_bullet[i]		= new Ball(-1000, 0, false);
