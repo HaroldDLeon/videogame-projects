@@ -103,7 +103,7 @@ public class Boss extends Rect {
 				(y + height > ball.y));
 	}
 	public void draw(Graphics g){
-		if(health >= 0 || is_dead){
+		if(health <= 0 || is_dead){
 			g.drawImage(explosion.nextImage(),(int)x, (int)y, null);
 		}
 		if (type == walker){
